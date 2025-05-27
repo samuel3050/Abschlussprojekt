@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Monopoly</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #f4f4f4;
+      position: relative;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .board-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(11, 3.5vw);
+      grid-template-rows: repeat(11, 3.5vw);
+      gap: 1px;
+    }
+
+    .feld {
+      background-color: green;
+      border: 1px solid black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.8vw;
+      color: white;
+      position: relative;
+    }
+
+    .leer {
+      background-color: transparent;
+    }
+
+    .player {
+      position: absolute;
+      width: 2vw;
+      height: 2vw;
+      background-color: red;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .info {
+      text-align: center;
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+
+    .center-button {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h2>Monopoly</h2>
+
+  <div class="board-container">
+    <div class="board">
+      {% for y in range(11) %}
+        {% for x in range(11) %}
+          {% if (x, y) in felder %}
+            <div class="feld">
+              Feld {{ felder.index((x, y)) }}
+              {% if (x, y) == spieler_pos %}
+                <div class="player"></div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="leer"></div>
+          {% endif %}
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <form method="post" class="center-button">
+    <button type="submit">🎲 Würfeln</button>
+  </form>
+
+  {% if wurf %}
+    <div class="info">Du hast eine <strong>{{ wurf }}</strong> gewürfelt!</div>
+  {% endif %}
+
+</body>
+</html>
