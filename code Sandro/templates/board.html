@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Monopoly</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
     body {
       margin: 0;
@@ -89,6 +90,25 @@
       background-color: #0056b3;
     }
 
+    .dice-container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin: 30px 0;
+    }
+
+    .dice-container img {
+      width: 120px;
+      height: 120px;
+      transition: transform 0.3s ease;
+    }
+
+    #anzeige {
+      font-size: 1.4rem;
+      color: #023047;
+      margin-top: 20px;
+    }
+
   </style>
 </head>
 <body>
@@ -114,13 +134,17 @@
     </div>
   </div>
 
+  <div class="dice-container">
+    <img id="w1" src="{{ url_for('static', filename='dice/1.png') }}">
+    <img id="w2" src="{{ url_for('static', filename='dice/1.png') }}">
+  </div>
+
   <form method="post" class="center-button">
-    <button type="submit">🎲 Würfeln</button>
+    <button type="button" onclick="wuerfeln()">🎲 Würfeln</button>
   </form>
 
-  {% if wurf %}
-    <div class="info">Du hast eine <strong>{{ wurf }}</strong> gewürfelt!</div>
-  {% endif %}
+  <p id="anzeige"></p>
 
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
