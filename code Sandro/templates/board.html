@@ -225,12 +225,25 @@
         text-align: center;
       ">
         <h3>{{ feldinfo.name }}</h3>
+        <p>Typ: <b>{{ feldinfo.typ }}</b></p>
+        {% if feldinfo.kaufpreis %}
+          <p>Kaufpreis: <b>{{ feldinfo.kaufpreis }}</b></p>
+        {% endif %}
+        {% if feldinfo.miete %}
+          <p>Miete: <b>{{ feldinfo.miete }}</b></p>
+        {% endif %}
+        {% if feldinfo.farbe %}
+          <p>Farbe: <b>{{ feldinfo.farbe }}</b></p>
+        {% endif %}
+        <p>Alkohol: <b>{{ feldinfo.alkohol_typ }}</b> ({{ feldinfo.alkohol_menge }})</p>
+        {% if feldinfo.zusatz_regel %}
+          <p>Regel: <b>{{ feldinfo.zusatz_regel }}</b></p>
+        {% endif %}
         {% if not feldinfo.besitzer %}
-          <p>Dieses Feld ist frei.<br>Kaufpreis: <b>{{ feldinfo.kaufpreis }}</b></p>
+          <p>Dieses Feld ist frei.</p>
           <button style="margin-top:10px;">Feld kaufen</button>
         {% elif feldinfo.besitzer != spieler[aktiver] %}
-          <p>Besitzer: <b>{{ feldinfo.besitzer }}</b><br>
-          Miete zu zahlen: <b>{{ feldinfo.miete }}</b></p>
+          <p>Besitzer: <b>{{ feldinfo.besitzer }}</b></p>
           <button style="margin-top:10px;">Miete zahlen</button>
         {% else %}
           <p>Du besitzt dieses Feld.</p>

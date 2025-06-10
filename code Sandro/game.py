@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import random
+import mysql.connector
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
@@ -12,11 +13,19 @@ felder = (
     [(0, y) for y in range(9, 0, -1)]
 )
 
-# --- NEU: Felderinfos für Kauf/Miete (Dummy-Daten, später aus DB laden) ---
-felder_infos = [
-    {"name": f"Feld {i}", "kaufpreis": 100 + i*10, "miete": 20 + i*2, "besitzer": None}
-    for i in range(len(felder))
-]
+def lade_felder_infos():
+    conn = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="monopoly_trinkspiel"
+    )
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM spielfelder ORDER BY feld_id ASC")
+    felder_db = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return felder_db
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -43,6 +52,9 @@ def spiel():
     if "spieler" not in session or "positionen" not in session or "aktiver" not in session:
         return redirect(url_for("index"))
 
+    # Felderinfos aus DB laden
+    felder_infos = lade_felder_infos()
+
     feldinfo = None
     zeige_feldinfo = False
 
@@ -54,7 +66,7 @@ def spiel():
 
         # Spielerposition aktualisieren
         pos_liste = session["positionen"]
-        neue_pos = (pos_liste[aktiver] + summe) % len(felder)
+        neue_pos = (pos_liste[aktiver] + summe) % len(felder_infos)
         pos_liste[aktiver] = neue_pos
         session["positionen"] = pos_liste
 
@@ -75,11 +87,13 @@ def spiel():
     aktiver = session.get("aktiver", 0)
     pos_liste = session.get("positionen", [])
 
+    # Felderinfos aus DB laden (erneut, damit immer aktuell)
+    felder_infos = lade_felder_infos()
+
     # Feldinfo und Flag nur anzeigen, wenn nach Bewegung (Flag gesetzt)
     if session.get("zeige_feldinfo"):
         feldinfo = session.get("feldinfo")
         zeige_feldinfo = True
-        # Flag zurücksetzen, damit es nur einmal angezeigt wird
         session["zeige_feldinfo"] = False
     else:
         feldinfo = None
@@ -87,13 +101,14 @@ def spiel():
 
     return render_template(
         "board.html",
-        felder=felder,
+        felder=[(f["feld_id"]-1) for f in felder_infos],  # für das Grid
         spieler=session.get("spieler", []),
         positionen=pos_liste,
         aktiver=aktiver,
         wurf=session.get("wurf"),
         feldinfo=feldinfo,
-        zeige_feldinfo=zeige_feldinfo
+        zeige_feldinfo=zeige_feldinfo,
+        felder_infos=felder_infos
     )
 
 if __name__ == "__main__":
