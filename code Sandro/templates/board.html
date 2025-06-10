@@ -15,7 +15,6 @@
       justify-content: center;
       min-height: 100vh;
       background-color: #f4f4f4;
-      position: relative;
     }
 
     h2 {
@@ -27,6 +26,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      position: relative;
     }
 
     .board {
@@ -55,12 +55,27 @@
       position: absolute;
       width: 2vw;
       height: 2vw;
-      background-color: red;
       border-radius: 50%;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1vw;
+      color: black;
     }
+
+    /* Farben für Spieler 1 bis 8 */
+    .p1 { background-color: red; color: white; }
+    .p2 { background-color: blue; color: white; }
+    .p3 { background-color: yellow; color: black; }
+    .p4 { background-color: green; color: white; }
+    .p5 { background-color: orange; color: black; }
+    .p6 { background-color: purple; color: white; }
+    .p7 { background-color: cyan; color: black; }
+    .p8 { background-color: pink; color: black; }
 
     .info {
       text-align: center;
@@ -69,10 +84,8 @@
     }
 
     .center-button {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      text-align: center;
+      margin-top: 20px;
     }
 
     button {
@@ -109,22 +122,57 @@
       margin-top: 20px;
     }
 
+    /* Neu: Stil für das zentrierte Overlay */
+    #center-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: transparent;
+      border-radius: 18px;
+     
+      padding: 32px 36px 24px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 480px;
+      min-height: 260px;
+      z-index: 10;
+    }
+
+    /* Neu: Stil für das Feld-Info-Popup */
+    #feld-popup {
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.98);
+      border: 2px solid #007bff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      padding: 32px 40px;
+      min-width: 320px;
+      z-index: 1000;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
 
   <h2>Monopoly</h2>
 
-  <div class="board-container">
+  <div class="board-container" style="position: relative;">
     <div class="board">
       {% for y in range(11) %}
         {% for x in range(11) %}
           {% if (x, y) in felder %}
             <div class="feld">
               Feld {{ felder.index((x, y)) }}
-              {% if (x, y) == spieler_pos %}
-                <div class="player"></div>
-              {% endif %}
+              {% for i in range(spieler|length) %}
+                {% if felder[positionen[i]] == (x, y) %}
+                  <div class="player p{{ i + 1 }}">{{ i + 1 }}</div>
+                {% endif %}
+              {% endfor %}
             </div>
           {% else %}
             <div class="leer"></div>
@@ -132,19 +180,77 @@
         {% endfor %}
       {% endfor %}
     </div>
+    <!-- Overlay für Würfeln, Würfel und Anzeige -->
+    <div id="center-overlay" style="
+      position: absolute;
+      top: 70%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: transparent;
+      border-radius: 18px;
+
+      padding: 32px 36px 24px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 480px;
+      min-height: 260px;
+      z-index: 10;
+    ">
+      <form method="post" onsubmit="return wuerfeln();">
+        <button id="wuerfelnBtn" type="submit">🎲 Würfeln</button>
+      </form>
+      <div class="dice-container" style="margin: 24px 0 0 0;">
+        <img id="w1" src="{{ url_for('static', filename='dice/1.png') }}">
+        <img id="w2" src="{{ url_for('static', filename='dice/1.png') }}">
+      </div>
+      <p id="anzeige" style="margin-top: 18px;">
+        {% if wurf %}
+          {{ spieler[aktiver] }} hat {{ wurf[0] }} und {{ wurf[1] }} gewürfelt (Summe: {{ wurf[0] + wurf[1] }})
+        {% endif %}
+      </p>
+    </div>
+    {% if feldinfo and zeige_feldinfo %}
+      <div id="feld-popup" style="
+        position: fixed;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(255,255,255,0.98);
+        border: 2px solid #007bff;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+        padding: 32px 40px;
+        min-width: 320px;
+        z-index: 1000;
+        text-align: center;
+      ">
+        <h3>{{ feldinfo.name }}</h3>
+        {% if not feldinfo.besitzer %}
+          <p>Dieses Feld ist frei.<br>Kaufpreis: <b>{{ feldinfo.kaufpreis }}</b></p>
+          <button style="margin-top:10px;">Feld kaufen</button>
+        {% elif feldinfo.besitzer != spieler[aktiver] %}
+          <p>Besitzer: <b>{{ feldinfo.besitzer }}</b><br>
+          Miete zu zahlen: <b>{{ feldinfo.miete }}</b></p>
+          <button style="margin-top:10px;">Miete zahlen</button>
+        {% else %}
+          <p>Du besitzt dieses Feld.</p>
+        {% endif %}
+        <button style="margin-top:18px;" onclick="document.getElementById('feld-popup').style.display='none'">Schließen</button>
+      </div>
+    {% endif %}
   </div>
 
-  <div class="dice-container">
-    <img id="w1" src="{{ url_for('static', filename='dice/1.png') }}">
-    <img id="w2" src="{{ url_for('static', filename='dice/1.png') }}">
-  </div>
-
-  <form method="post" class="center-button">
-    <button type="button" onclick="wuerfeln()">🎲 Würfeln</button>
-  </form>
-
-  <p id="anzeige"></p>
-
+  <script>
+    window.aktiverSpieler = "{{ spieler[aktiver] }}";
+    window.aktiverIndex = {{ aktiver }};
+    window.positionen = {{ positionen|tojson }};
+    window.felder = {{ felder|tojson }};
+    {% if wurf %}
+      window.wurf = {{ wurf|tojson }};
+    {% else %}
+      window.wurf = null;
+    {% endif %}
+  </script>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
