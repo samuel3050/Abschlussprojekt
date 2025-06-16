@@ -423,6 +423,7 @@
             let aktiver = {{ popup_spieler }};
             let spielername = "{{ spieler[popup_spieler] }}";
             let feld_idx = {{ pending_popup["feld"] if pending_popup else 0 }};
+            let feld_id = {{ feldinfo.feld_id if pending_popup else 0 }};
             let html = `<h3>${feld.name}</h3>`;
             html += `<p>Typ: <b>${feld.typ}</b></p>`;
             if (feld.kaufpreis) html += `<p>Kaufpreis: <b>${feld.kaufpreis}</b></p>`;
@@ -431,14 +432,14 @@
             if (feld.zusatz_regel) html += `<p>Regel: <b>${feld.zusatz_regel}</b></p>`;
             if (!feld.besitzer) {
               html += `<p>Dieses Feld ist frei.</p>`;
-              html += `<button id="kaufen-btn" data-feld="${feld_idx}">Feld kaufen</button>`;
-              html += `<button id="skip-btn" data-feld="${feld_idx}">Nicht kaufen</button>`;
+              html += `<button id="kaufen-btn" data-feld="${feld_id}">Feld kaufen</button>`;
+              html += `<button id="skip-btn" data-feld="${feld_id}">Nicht kaufen</button>`;
             } else if (feld.besitzer !== spielername) {
               html += `<p>Besitzer: <b>${feld.besitzer}</b></p>`;
-              html += `<button id="miete-btn" data-feld="${feld_idx}">Miete zahlen</button>`;
+              html += `<button id="miete-btn" data-feld="${feld_id}">Miete zahlen</button>`;
             } else {
               html += `<p>Du besitzt dieses Feld.</p>`;
-              html += `<button id="skip-btn" data-feld="${feld_idx}">OK</button>`;
+              html += `<button id="skip-btn" data-feld="${feld_id}">OK</button>`;
             }
             document.getElementById('feld-modal-content').innerHTML = html;
             document.getElementById('feld-modal').style.display = 'block';
