@@ -1,39 +1,47 @@
+"""Flask basierte Umsetzung eines einfachen Sauf‑Monopoly."""
+
+from contextlib import contextmanager
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+import os
 import random
 import mysql.connector
-import os
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
+# Datenbank Konfiguration kann über Umgebungsvariablen angepasst werden
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "localhost"),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD", ""),
+    "database": os.getenv("DB_NAME", "saufmonopoly"),
+}
+
+
+@contextmanager
+def db_cursor(dictionary=False):
+    """Context manager der einen Datenbank Cursor liefert."""
+    conn = mysql.connector.connect(**DB_CONFIG)
+    cursor = conn.cursor(dictionary=dictionary)
+    try:
+        yield cursor
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
 FELD_ANZAHL = 40
 
 def reset_besitzer():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="saufmonopoly"
-    )
-    cursor = conn.cursor()
-    cursor.execute("UPDATE spielfelder SET besitzer=NULL")
-    conn.commit()
-    cursor.close()
-    conn.close()
+    """Setzt alle Spielfelder auf 'frei'."""
+    with db_cursor() as cursor:
+        cursor.execute("UPDATE spielfelder SET besitzer=NULL")
 
 def lade_felder_infos():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",
-        database="saufmonopoly"
-    )
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM spielfelder ORDER BY feld_id ASC")
-    felder_infos = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return felder_infos
+    """Lädt alle Spielfeld Informationen als Liste von Dicts."""
+    with db_cursor(dictionary=True) as cursor:
+        cursor.execute("SELECT * FROM spielfelder ORDER BY feld_id ASC")
+        return cursor.fetchall()
 
 def get_besitz_uebersicht():
     felder_infos = lade_felder_infos()
@@ -187,18 +195,12 @@ def feld_aktion():
     feld_id = feld["feld_id"]
 
     if aktion == "kaufen":
-        conn = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password="",
-            database="saufmonopoly"
-        )
-        cursor = conn.cursor()
         spielername = session["spieler"][aktiver]
-        cursor.execute("UPDATE spielfelder SET besitzer=%s WHERE feld_id=%s", (spielername, feld_id))
-        conn.commit()
-        cursor.close()
-        conn.close()
+        with db_cursor() as cursor:
+            cursor.execute(
+                "UPDATE spielfelder SET besitzer=%s WHERE feld_id=%s",
+                (spielername, feld_id),
+            )
         schlucke = parse_schlucke(feld.get("kaufpreis"))
         session["konto"][aktiver] += schlucke
         session["pending_popup"] = None
