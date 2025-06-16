@@ -256,9 +256,23 @@
     <div class="board">
       {# Mapping für deutsche Farbnamen zu CSS #}
       {% set farbmap = {
-        'gelb': 'yellow', 'rot': 'red', 'blau': 'blue', 'orange': 'orange',
-        'schwarz': 'black', 'lila': 'purple', 'gold': 'gold', 'grün': 'green',
-        'pink': 'pink', 'cyan': 'cyan', 'weiß': 'white'
+        'gelb': 'yellow',
+        'rot': 'red',
+        'blau': 'blue',
+        'orange': 'orange',
+        'schwarz': 'black',
+        'lila': 'purple',
+        'gold': 'gold',
+        'gruen': 'green',
+        'grün': 'green',
+        'pink': 'pink',
+        'cyan': 'cyan',
+        'weiss': 'white',
+        'weiß': 'white',
+        'braun': '#964B00',
+        'hellblau': '#ADD8E6',
+        'dunkelgrau': '#A9A9A9',
+        'rainbow': 'linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet)'
       } %}
       {# Die 40 Koordinaten für die äußeren Felder #}
       {% set koords = [
@@ -278,7 +292,7 @@
             {% set feldinfo = felder_infos[feld_idx] %}
             {% set css_farbe = farbmap.get(feldinfo.farbe|lower, feldinfo.farbe|lower if feldinfo.farbe else 'green') %}
             <div class="feld"
-              style="background-color: {{ css_farbe }};
+              style="background: {{ css_farbe }};
                      border: 2px solid black; cursor:pointer;"
               data-feld-index="{{ feld_idx }}">
               {{ feldinfo.name }}
