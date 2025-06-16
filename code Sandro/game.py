@@ -193,24 +193,34 @@ def spiel():
 def feld_aktion():
     data = request.get_json()  # Holt die Aktion aus dem Request
     aktion = data.get("aktion")  # Aktionstyp (kaufen, miete, skip)
-    board_index = int(data.get("feld"))  # Index des Feldes (0..39)
+    feld_id = int(data.get("feld"))  # <-- Jetzt echte Feld-ID, nicht Listenindex!
     pending_popup = session.get("pending_popup")  # Aktuelles Popup
     if not pending_popup:
         return jsonify({"ok": False, "msg": "Kein aktiver Zug!"})  # Kein aktiver Zug
 
     aktiver = pending_popup["spieler"]  # Aktiver Spieler
     felder_infos = lade_felder_infos()  # Holt Felderinfos
-    feld = felder_infos[board_index]  # Das aktuelle Feld
-    feld_id = feld["feld_id"]  # Eindeutige ID des Feldes
+    # Suche das Feld mit der passenden ID
+    feld = next((f for f in felder_infos if int(f["feld_id"]) == feld_id), None)
+    if not feld:
+        return jsonify({"ok": False, "msg": f"Feld mit ID {feld_id} nicht gefunden."})
+
+    # --- Fix: Typ-Vergleich für Straße robust machen ---
+    def is_strassenfeld(feldtyp):
+        # Debug-Ausgabe für den Typ
+        print(f"[DEBUG] feldtyp repr: {repr(feldtyp)}")
+        typ_str = str(feldtyp).strip().lower().replace("ß", "ss")
+        print(f"[DEBUG] feldtyp normalisiert: {typ_str}")
+        return typ_str == "strasse"
 
     if aktion == "kaufen":
-        spielername = session["spieler"][aktiver]  # Name des aktiven Spielers
+        spielername = session["spieler"][aktiver]
         print(
             f"[DEBUG] {spielername} möchte Feld {feld_id} ({feld['name']}) vom Typ {feld['typ']} kaufen"
         )
-        if feld["typ"] != "Straße":
-            print("[DEBUG] Kauf abgelehnt - kein Straßenfeld")
-            return jsonify({"ok": False, "msg": "Nur Straßen können gekauft werden."})
+        if not is_strassenfeld(feld["typ"]):
+            print(f"[DEBUG] Kauf abgelehnt - kein Straßenfeld (typ war: {repr(feld['typ'])})")
+            return jsonify({"ok": False, "msg": f"Nur Straßen können gekauft werden. (typ: {repr(feld['typ'])})"})
         with db_cursor() as cursor:
             cursor.execute(
                 "UPDATE spielfelder SET besitzer=%s WHERE feld_id=%s",
