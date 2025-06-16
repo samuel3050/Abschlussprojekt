@@ -532,15 +532,17 @@
         let w1 = document.getElementById('anim-w1');
         let w2 = document.getElementById('anim-w2');
         let count = 0, max = 13;
-        let wurf = [1,1];
         let anim = setInterval(() => {
-          wurf = [Math.floor(Math.random()*6)+1, Math.floor(Math.random()*6)+1];
-          w1.src = `/static/dice/${wurf[0]}.png`;
-          w2.src = `/static/dice/${wurf[1]}.png`;
+          let r1 = Math.floor(Math.random()*6)+1;
+          let r2 = Math.floor(Math.random()*6)+1;
+          w1.src = `/static/dice/${r1}.png`;
+          w2.src = `/static/dice/${r2}.png`;
           count++;
           if (count >= max) {
             clearInterval(anim);
-            document.getElementById('wurf-modal-text').textContent = "{{ spieler[aktiver] }} hat gewürfelt!";
+            w1.src = `/static/dice/${window.wurf[0]}.png`;
+            w2.src = `/static/dice/${window.wurf[1]}.png`;
+            document.getElementById('wurf-modal-text').textContent = `${window.aktiverSpieler} hat ${window.wurf[0] + window.wurf[1]} gewürfelt!`;
             document.getElementById('wurf-bestätigen-btn').style.display = '';
             document.getElementById('wurf-bestätigen-btn').onclick = function() {
               fetch(window.location.pathname, {method:"POST"}).then(() => location.reload());
