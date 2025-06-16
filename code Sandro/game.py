@@ -195,16 +195,15 @@ def feld_aktion():
     aktiver = pending_popup["spieler"]  # Aktiver Spieler
     felder_infos = lade_felder_infos()  # Holt Felderinfos
     feld = felder_infos[board_index]  # Das aktuelle Feld
-    # feld_id = feld["feld_id"]  # Datenbank-ID des Feldes (NICHT MEHR NUTZEN)
-    feld_name = feld["name"]  # Name des Feldes (eindeutig)
+    feld_id = feld["feld_id"]  # Eindeutige ID des Feldes
 
     if aktion == "kaufen":
         spielername = session["spieler"][aktiver]  # Name des aktiven Spielers
         with db_cursor() as cursor:
             cursor.execute(
-                "UPDATE spielfelder SET besitzer=%s WHERE name=%s",
-                (spielername, feld_name),
-            )  # Setzt den Besitzer in der DB anhand des Namens
+                "UPDATE spielfelder SET besitzer=%s WHERE feld_id=%s",
+                (spielername, feld_id),
+            )  # Setzt den Besitzer in der DB anhand der ID
         schlucke = parse_schlucke(feld.get("kaufpreis"))  # Holt die Schlucke für den Kauf
         session["konto"][aktiver] += schlucke  # Addiert Schlucke zum Konto
         session["pending_popup"] = None  # Popup schließen
