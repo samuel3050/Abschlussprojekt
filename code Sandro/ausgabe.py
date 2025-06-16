@@ -21,15 +21,6 @@ felder = cursor.fetchall()
 
 
 
-feldname = "Biergasse 1"
-spieler = "Lorenz"
-
-cursor.execute(
-    "UPDATE spielfelder SET besitzer = %s WHERE name = %s",
-    (spieler, feldname)
-)
-conn.commit()  # wichtig: Änderungen speichern
-
 
 
 
