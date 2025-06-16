@@ -163,13 +163,36 @@
 
   <div class="board-container" style="position: relative;">
     <div class="board">
+      {# Mapping für deutsche Farbnamen zu CSS #}
+      {% set farbmap = {
+        'gelb': 'yellow', 'rot': 'red', 'blau': 'blue', 'orange': 'orange',
+        'schwarz': 'black', 'lila': 'purple', 'gold': 'gold', 'grün': 'green',
+        'pink': 'pink', 'cyan': 'cyan', 'weiß': 'white'
+      } %}
+      {# Die 40 Koordinaten für die äußeren Felder #}
+      {% set koords = [
+        (0,0),(1,0),(2,0),(3,0),(4,0),(5,0),(6,0),(7,0),(8,0),(9,0),(10,0),
+        (10,1),(10,2),(10,3),(10,4),(10,5),(10,6),(10,7),(10,8),(10,9),(10,10),
+        (9,10),(8,10),(7,10),(6,10),(5,10),(4,10),(3,10),(2,10),(1,10),(0,10),
+        (0,9),(0,8),(0,7),(0,6),(0,5),(0,4),(0,3),(0,2),(0,1)
+      ] %}
+      {% set feld_koord_map = {} %}
+      {% for idx in range(40) %}
+        {% set _ = feld_koord_map.update({koords[idx]: idx}) %}
+      {% endfor %}
       {% for y in range(11) %}
         {% for x in range(11) %}
-          {% if (x, y) in felder %}
-            <div class="feld">
-              Feld {{ felder.index((x, y)) }}
+          {% if (x, y) in feld_koord_map %}
+            {% set feld_idx = feld_koord_map[(x, y)] %}
+            {% set feldinfo = felder_infos[feld_idx] %}
+            {% set css_farbe = farbmap.get(feldinfo.farbe|lower, feldinfo.farbe|lower if feldinfo.farbe else 'green') %}
+            <div class="feld"
+              style="background-color: {{ css_farbe }};
+                     border: 2px solid black; cursor:pointer;"
+              data-feld-index="{{ feld_idx }}">
+              {{ feldinfo.name }}
               {% for i in range(spieler|length) %}
-                {% if felder[positionen[i]] == (x, y) %}
+                {% if feld_idx == positionen[i] %}
                   <div class="player p{{ i + 1 }}">{{ i + 1 }}</div>
                 {% endif %}
               {% endfor %}
@@ -209,35 +232,28 @@
         {% endif %}
       </p>
     </div>
-    {% if feldinfo and zeige_feldinfo %}
-      <div id="feld-popup" style="
-        position: fixed;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(255,255,255,0.98);
-        border: 2px solid #007bff;
-        border-radius: 16px;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-        padding: 32px 40px;
-        min-width: 320px;
-        z-index: 1000;
-        text-align: center;
-      ">
-        <h3>{{ feldinfo.name }}</h3>
-        {% if not feldinfo.besitzer %}
-          <p>Dieses Feld ist frei.<br>Kaufpreis: <b>{{ feldinfo.kaufpreis }}</b></p>
-          <button style="margin-top:10px;">Feld kaufen</button>
-        {% elif feldinfo.besitzer != spieler[aktiver] %}
-          <p>Besitzer: <b>{{ feldinfo.besitzer }}</b><br>
-          Miete zu zahlen: <b>{{ feldinfo.miete }}</b></p>
-          <button style="margin-top:10px;">Miete zahlen</button>
-        {% else %}
-          <p>Du besitzt dieses Feld.</p>
-        {% endif %}
-        <button style="margin-top:18px;" onclick="document.getElementById('feld-popup').style.display='none'">Schließen</button>
-      </div>
-    {% endif %}
+    <!-- Modal für Felddetails (wird per JS befüllt) -->
+    <div id="feld-modal" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%,-50%); background:rgba(255,255,255,0.98); border:2px solid #007bff; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.18); padding:32px 40px; min-width:320px; z-index:1000; text-align:center;">
+      <div id="feld-modal-content"></div>
+      <button style="margin-top:18px;" onclick="document.getElementById('feld-modal').style.display='none'">Schließen</button>
+    </div>
+  </div>
+
+  <!-- Spielerstände anzeigen -->
+  <div style="margin-top: 32px;">
+    <h3>Spielerstände</h3>
+    <table style="margin: 0 auto; border-collapse: collapse;">
+      <tr>
+        <th style="padding: 6px 18px;">Spieler</th>
+        <th style="padding: 6px 18px;">Schlucke</th>
+      </tr>
+      {% for i in range(spieler|length) %}
+      <tr>
+        <td style="padding: 6px 18px;">{{ spieler[i] }}</td>
+        <td style="padding: 6px 18px;">{{ konto[i] }}</td>
+      </tr>
+      {% endfor %}
+    </table>
   </div>
 
   <script>
@@ -245,10 +261,68 @@
     window.aktiverIndex = {{ aktiver }};
     window.positionen = {{ positionen|tojson }};
     window.felder = {{ felder|tojson }};
+    window.felder_infos = {{ felder_infos|tojson }};
     {% if wurf %}
       window.wurf = {{ wurf|tojson }};
     {% else %}
       window.wurf = null;
+    {% endif %}
+
+    // Nach dem Würfeln: Modal für das aktuelle Feld sofort öffnen (ohne 1 Sekunde warten)
+    {% if wurf %}
+    window.addEventListener("DOMContentLoaded", function() {
+      // Aktiver Spieler ist der, der zuletzt geworfen hat (vor dem Wechsel)
+      let aktiver = (window.aktiverIndex - 1 + window.positionen.length) % window.positionen.length;
+      let feldIdx = window.positionen[aktiver];
+      let feld = window.felder_infos && window.felder_infos[feldIdx];
+      if (!feld) return;
+      let html = `<h3>${feld.name}</h3>`;
+      html += `<p>Typ: <b>${feld.typ}</b></p>`;
+      if (feld.kaufpreis) html += `<p>Kaufpreis: <b>${feld.kaufpreis}</b></p>`;
+      if (feld.miete) html += `<p>Miete: <b>${feld.miete}</b></p>`;
+      if (feld.farbe) html += `<p>Farbe: <b>${feld.farbe}</b></p>`;
+      html += `<p>Alkohol: <b>${feld.alkohol_typ}</b> (${feld.alkohol_menge})</p>`;
+      if (feld.zusatz_regel) html += `<p>Regel: <b>${feld.zusatz_regel}</b></p>`;
+      // Nur wenn aktiver Spieler auf diesem Feld steht, Button anzeigen
+      if (!feld.besitzer) {
+        html += `<p>Dieses Feld ist frei.</p>`;
+        if (window.positionen[aktiver] === feldIdx) {
+          html += `<button id="kaufen-btn" data-feld="${feldIdx}">Feld kaufen</button>`;
+        }
+      } else if (feld.besitzer !== window.spieler ? window.spieler[aktiver] : "") {
+        html += `<p>Besitzer: <b>${feld.besitzer}</b></p>`;
+        if (window.positionen[aktiver] === feldIdx) {
+          html += `<button id="miete-btn" data-feld="${feldIdx}">Miete zahlen</button>`;
+        }
+      } else {
+        html += `<p>Du besitzt dieses Feld.</p>`;
+      }
+      document.getElementById('feld-modal-content').innerHTML = html;
+      document.getElementById('feld-modal').style.display = 'block';
+
+      setTimeout(() => {
+        const kaufenBtn = document.getElementById('kaufen-btn');
+        if (kaufenBtn) {
+          kaufenBtn.onclick = function() {
+            fetch('/feld_aktion', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({aktion: 'kaufen', feld: feldIdx})
+            }).then(() => location.reload());
+          };
+        }
+        const mieteBtn = document.getElementById('miete-btn');
+        if (mieteBtn) {
+          mieteBtn.onclick = function() {
+            fetch('/feld_aktion', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({aktion: 'miete', feld: feldIdx})
+            }).then(() => location.reload());
+          };
+        }
+      }, 100);
+    });
     {% endif %}
   </script>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
