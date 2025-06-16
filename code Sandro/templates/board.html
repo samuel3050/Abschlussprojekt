@@ -527,10 +527,13 @@
         };
       {% elif zeige_wurf_popup %}
         // 2. Würfelanimation und Wurf-Popup
-        document.getElementById('wurf-modal').style.display = 'block';
-        document.getElementById('wurf-modal-text').textContent = "{{ spieler[aktiver] }} würfelt...";
-        let w1 = document.getElementById('anim-w1');
-        let w2 = document.getElementById('anim-w2');
+        const popup = document.getElementById('wurf-popup');
+        const popupText = document.getElementById('wurf-popup-text');
+        const okBtn = document.getElementById('wurf-popup-ok');
+        popup.style.display = 'block';
+        popupText.textContent = "{{ spieler[aktiver] }} würfelt...";
+        let w1 = document.getElementById('w1');
+        let w2 = document.getElementById('w2');
         let count = 0, max = 13;
         let anim = setInterval(() => {
           let r1 = Math.floor(Math.random()*6)+1;
@@ -542,10 +545,10 @@
             clearInterval(anim);
             w1.src = `/static/dice/${window.wurf[0]}.png`;
             w2.src = `/static/dice/${window.wurf[1]}.png`;
-            document.getElementById('wurf-modal-text').textContent = `${window.aktiverSpieler} hat ${window.wurf[0] + window.wurf[1]} gewürfelt!`;
-            document.getElementById('wurf-bestätigen-btn').style.display = '';
-            document.getElementById('wurf-bestätigen-btn').onclick = function() {
-              fetch(window.location.pathname, {method:"POST"}).then(() => location.reload());
+            popupText.textContent = `${window.aktiverSpieler} hat ${window.wurf[0] + window.wurf[1]} gewürfelt!`;
+            okBtn.style.display = '';
+            okBtn.onclick = function() {
+              fetch(window.location.pathname, {method:'POST'}).then(() => location.reload());
             };
           }
         }, 80);

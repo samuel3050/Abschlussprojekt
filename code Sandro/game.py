@@ -102,6 +102,9 @@ def spiel():
             würfel1 = random.randint(1, 6)  # Erster Würfel
             würfel2 = random.randint(1, 6)  # Zweiter Würfel
             summe = würfel1 + würfel2  # Summe der Würfel
+            print(
+                f"[DEBUG] {session['spieler'][aktiver]} würfelt {würfel1} + {würfel2} = {summe}"
+            )
             session["wurf"] = [würfel1, würfel2]  # Speichert den Wurf
             session["warte_auf_wurf"] = False  # Nicht mehr warten
             return redirect("/board")  # Seite neu laden
@@ -129,6 +132,9 @@ def spiel():
             summe = wurf[0] + wurf[1]  # Summe der Würfel
             aktuelle_pos = session["positionen"][aktiver]  # Aktuelle Position
             neue_pos = (aktuelle_pos + summe) % len(felder_infos)  # Neue Position nach dem Zug
+            print(
+                f"[DEBUG] {session['spieler'][aktiver]} zieht {summe} Felder von {aktuelle_pos} auf {neue_pos}"
+            )
             session["positionen"][aktiver] = neue_pos  # Speichert neue Position
             session["gesamt"][aktiver] += summe  # Addiert zur Gesamtzahl
             session["pending_popup"] = {
@@ -199,6 +205,12 @@ def feld_aktion():
 
     if aktion == "kaufen":
         spielername = session["spieler"][aktiver]  # Name des aktiven Spielers
+        print(
+            f"[DEBUG] {spielername} möchte Feld {feld_id} ({feld['name']}) vom Typ {feld['typ']} kaufen"
+        )
+        if feld["typ"] != "Straße":
+            print("[DEBUG] Kauf abgelehnt - kein Straßenfeld")
+            return jsonify({"ok": False, "msg": "Nur Straßen können gekauft werden."})
         with db_cursor() as cursor:
             cursor.execute(
                 "UPDATE spielfelder SET besitzer=%s WHERE feld_id=%s",
