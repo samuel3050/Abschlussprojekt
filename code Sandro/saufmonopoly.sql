@@ -44,60 +44,72 @@ CREATE TABLE `spielfelder` (
 -- Daten für Tabelle `spielfelder`
 --
 
--- Eckfelder (Special-Felder ohne Alkohol oder Joker)
+-- Eckfelder (Special-Felder)
 INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
-(1, 'Los', 'Los', NULL, NULL, NULL, 'Wasser', '0', 'Starthilfe: 1 Schluck Bier', NULL),
+(1, 'Los', 'Los', NULL, NULL, 'Dunkelgrau', 'Wasser', '0', 'Starthilfe: 1 Schluck Bier', NULL),
 (10, 'Alkohol-Joker', 'Spezial', NULL, NULL, 'Rainbow', 'Joker', '0', 'Wähle einen beliebigen Alkoholtyp', NULL),
-(20, 'Hydrations-Station', 'Spezial', NULL, NULL, 'Blau', 'Wasser', '0', 'Trinke Wasser - überspringe nächsten Shot', NULL),
-(30, 'Kater-Polizei', 'Spezial', NULL, NULL, 'Rot', 'Wasser', '0', 'Wenn du betrunken bist: 1 Runde Pause', NULL);
+(20, 'Hydrations-Station', 'Spezial', NULL, NULL, 'Rainbow', 'Wasser', '0', 'Trinke Wasser - überspringe nächsten Shot', NULL),
+(30, 'Kater-Polizei', 'Spezial', NULL, NULL, 'Rainbow', 'Wasser', '0', 'Wenn du betrunken bist: 1 Runde Pause', NULL),
+(40, 'Endspurt', 'Spezial', NULL, NULL, 'Rainbow', 'Shot', '3', 'Letzter Spieler trinkt doppelt', NULL);
 
--- Fields 2-9: Wein und Bier (Rot und Gelb)
+-- Felder 2-6: Bier (Braun)
 INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
-(2, 'Biergasse 1', 'Straße', '2 Schlucke', '1 Schluck', 'Gelb', 'Bier', '1 Schluck', NULL, 'Lorenz'),
-(3, 'Inndrinks', 'Straße', '3 Schlucke', '2 Schlucke', 'Gelb', 'Bier', '2 Schlucke', 'Sie bringen dir ein neues Bier', NULL),
-(4, 'HTL Anichstrasse', 'Gemeinschaft', NULL, NULL, NULL, 'Bier', '0', 'Würfel bestimmt Menge', NULL),
-(5, 'Weinberg', 'Straße', '1 Glas', '3 Schlucke', 'Rot', 'Wein', '1 Glas', NULL, NULL),
-(6, 'Sektempfang', 'Straße', '3 Schlücke', '2 Schlücke', 'Rot', 'Wein', '2 Gläser', NULL, NULL),
-(7, 'Magic', 'Gemeinschaft', NULL, NULL, NULL, '', '0', 'Gönn dir mal eine Pause', NULL),
-(8, 'Ereignisfeld', 'Ereignis', NULL, NULL, NULL, 'Shot', '1', 'Karte ziehen: Würfel entscheidet', NULL),
-(9, 'Bierpalast', 'Straße', '5 Schlucke', '3 Schlucke', 'Gelb', 'Bier', '3 Schlucke', NULL, NULL);
+(2, 'Biergasse 1', 'Straße', '2 Schlucke', '1 Schluck', 'Braun', 'Bier', '1 Schluck', NULL, 'Lorenz'),
+(3, 'Inndrinks', 'Straße', '3 Schlucke', '2 Schlucke', 'Braun', 'Bier', '2 Schlucke', 'Sie bringen dir ein neues Bier', NULL),
+(4, 'HTL Anichstrasse', 'Gemeinschaft', NULL, NULL, 'Braun', 'Bier', '0', 'Würfel bestimmt Menge', NULL),
+(5, 'Bierpalast', 'Straße', '5 Schlucke', '3 Schlucke', 'Braun', 'Bier', '3 Schlucke', NULL, NULL),
+(6, 'Biergarten', 'Straße', '4 Schlucke', '2 Schlucke', 'Braun', 'Bier', '2 Schlucke', NULL, NULL);
 
--- Fields 11-19: Mixgetränke (Grün und Blau)
+-- Felder 7-9: Wein (Hellblau)
 INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
-(11, 'Longdrink-Meile', 'Straße', '6 Schlucke', '5 Schlucke', 'Grün', 'Mixgetränk', '5 Schlucke', NULL, NULL),
-(12, 'Cocktail-Straße', 'Straße', '1 Glas', '1 Glas', 'Grün', 'Mixgetränk', '1 Glas', NULL, NULL),
-(13, 'Gemeinschaft', 'Gemeinschaft', NULL, NULL, NULL, 'Mixgetränk', '3 Schlucke', NULL, NULL),
-(14, 'Frei Parken', 'Frei Parken', NULL, NULL, NULL, 'Wasser', '0', 'Hydrationspause: 1 Runde aussetzen', NULL),
-(15, 'Wasserwerk', 'Werk', '1 Glas Wasser', NULL, NULL, 'Wasser', '1 Glas', NULL, NULL),
-(16, 'Tiki-Bar', 'Spezial', NULL, '4 Schlücke', NULL, 'Mixgetränk', '4 Schlucke', 'Alle trinken 1 Schluck', NULL),
-(17, 'Gin-Allee', 'Straße', '5 cl', '2 cl', 'Blau', 'Mixgetränk', '2 cl', NULL, NULL),
-(18, 'Whiskey-Platz', 'Straße', '6 cl', '3 cl', 'Blau', 'Mixgetränk', '3 cl', NULL, NULL),
-(19, 'Sektbar', 'Straße', '3 Gläser', '2 Gläser', 'Blau', 'Mixgetränk', '2 Gläser', NULL, NULL);
+(7, 'Weinberg', 'Straße', '1 Glas', '3 Schlucke', 'Hellblau', 'Wein', '1 Glas', NULL, NULL),
+(8, 'Sektempfang', 'Straße', '3 Schlücke', '2 Schlücke', 'Hellblau', 'Wein', '2 Gläser', NULL, NULL),
+(9, 'Weinstube', 'Straße', '4 Gläser', '3 Gläser', 'Hellblau', 'Wein', '3 Gläser', NULL, NULL);
 
--- Fields 21-29: Wein und Bier (Braun und Grau)
+-- Felder 11-15: Mixgetränke (Pink)
 INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
-(21, 'Bozner-Platz', 'Straße', '4 Schlücke', '3 Schlücke', 'Braun', 'Wein', '3 Gläser', NULL, NULL),
-(22, 'Kater-Gasse', 'Straße', 'Volles Glas', 'Mixgetränk ex', 'Braun', 'Kater', 'Alles', NULL, NULL),
-(23, 'Gefängnis', 'Gefängnis', NULL, '3 Shots', NULL, 'Shot', '3', 'Nachzahlung oder Pause', NULL),
-(24, 'Hangover-Platz', 'Straße', 'Nachschlag', 'Nachschlag', 'Grau', 'Kater', 'Nachschlag', NULL, NULL),
-(25, 'Mausefalle', 'Straße', 'Volles Glas', '10 Schlücke', 'Grau', 'Kater', 'Volles Glas', NULL, NULL),
-(26, 'Supermarkt', 'Werk', '1 Liter Wasser', NULL, NULL, 'Wasser', '1 Liter', 'Katerprophylaxe: 2 Runden Schutz', NULL),
-(27, 'Ereignisfeld', 'Ereignis', NULL, NULL, NULL, 'Shot', '1', NULL, NULL),
-(28, 'Ereignisfeld', 'Ereignis', NULL, NULL, NULL, 'Shot', '2', NULL, NULL),
-(29, 'Katerklinik', 'Spezial', NULL, NULL, NULL, 'Wasser', '0', 'Heilt 1 Kater-Runde', NULL);
+(11, 'Longdrink-Meile', 'Straße', '6 Schlucke', '5 Schlucke', 'Pink', 'Mixgetränk', '5 Schlucke', NULL, NULL),
+(12, 'Cocktail-Straße', 'Straße', '1 Glas', '1 Glas', 'Pink', 'Mixgetränk', '1 Glas', NULL, NULL),
+(13, 'Gin-Allee', 'Straße', '5 cl', '2 cl', 'Pink', 'Mixgetränk', '2 cl', NULL, NULL),
+(14, 'Whiskey-Platz', 'Straße', '6 cl', '3 cl', 'Pink', 'Mixgetränk', '3 cl', NULL, NULL),
+(15, 'Sektbar', 'Straße', '3 Gläser', '2 Gläser', 'Pink', 'Mixgetränk', '2 Gläser', NULL, NULL);
 
--- Fields 31-39: Shots und Schnäpse (Pink und Orange)
+-- Felder 16-19: Schnäpse (Orange)
 INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
-(31, 'Vodka-Strasse', 'Straße', '3 cl', '2 cl', 'Pink', 'Schnaps', '2 cl', NULL, NULL),
-(32, 'Rum-Meile', 'Straße', '4 cl', '3 cl', 'Pink', 'Schnaps', '3 cl', NULL, NULL),
-(33, 'Tequila-Kreuzung', 'Straße', '2 Shots', '1 Shot', 'Orange', 'Shot', '1', NULL, NULL),
-(34, 'Absinth-Allee', 'Straße', '3 Shots', '2 Shots', 'Orange', 'Shot', '2', NULL, NULL),
-(35, 'Kuppenweg 20', 'Straße', '8 cl', '4 cl', 'Pink', 'Schnaps', '4 cl', NULL, NULL),
-(36, 'Whiskey-Brücke', 'Straße', '7 cl', '4 cl', 'Orange', 'Schnaps', '4 cl', NULL, NULL),
-(37, 'Vodka-Bahnhof', 'Bahnhof', '6 cl', '3 Shots', NULL, 'Schnaps', '3 cl', NULL, NULL),
-(38, 'Sake-Bahnhof', 'Bahnhof', '5 cl', '2 Shots', NULL, 'Schnaps', '2 cl', NULL, NULL),
-(39, 'Steuer', 'Steuer', NULL, '4 Schlucke', NULL, 'Bier', '4 Schlucke', 'An alle verteilen', NULL),
-(40, 'Endspurt', 'Spezial', NULL, NULL, NULL, 'Shot', '3', 'Letzter Spieler trinkt doppelt', NULL);
+(16, 'Vodka-Strasse', 'Straße', '3 cl', '2 cl', 'Orange', 'Schnaps', '2 cl', NULL, NULL),
+(17, 'Rum-Meile', 'Straße', '4 cl', '3 cl', 'Orange', 'Schnaps', '3 cl', NULL, NULL),
+(18, 'Tequila-Kreuzung', 'Straße', '2 Shots', '1 Shot', 'Orange', 'Shot', '1', NULL, NULL),
+(19, 'Absinth-Allee', 'Straße', '3 Shots', '2 Shots', 'Orange', 'Shot', '2', NULL, NULL);
+
+-- Felder 21-25: Wein (Rot)
+INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
+(21, 'Bozner-Platz', 'Straße', '4 Schlücke', '3 Schlücke', 'Rot', 'Wein', '3 Gläser', NULL, NULL),
+(22, 'Rotwein-Gasse', 'Straße', '5 Gläser', '4 Gläser', 'Rot', 'Wein', '4 Gläser', NULL, NULL),
+(23, 'Gefängnis', 'Gefängnis', NULL, '3 Shots', 'Rot', 'Shot', '3', 'Nachzahlung oder Pause', NULL),
+(24, 'Weinhandlung', 'Straße', '6 Gläser', '5 Gläser', 'Rot', 'Wein', '5 Gläser', NULL, NULL),
+(25, 'Sektkellerei', 'Straße', '7 Gläser', '6 Gläser', 'Rot', 'Wein', '6 Gläser', NULL, NULL);
+
+-- Felder 26-29: Bier (Gelb)
+INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
+(26, 'Bierstube', 'Straße', '5 Schlucke', '4 Schlucke', 'Gelb', 'Bier', '4 Schlucke', NULL, NULL),
+(27, 'Biergarten', 'Straße', '6 Schlucke', '5 Schlucke', 'Gelb', 'Bier', '5 Schlucke', NULL, NULL),
+(28, 'Brauerei', 'Werk', '1 Liter Bier', NULL, 'Gelb', 'Bier', '1 Liter', 'Katerprophylaxe: 2 Runden Schutz', NULL),
+(29, 'Bierfest', 'Straße', '7 Schlucke', '6 Schlucke', 'Gelb', 'Bier', '6 Schlucke', NULL, NULL);
+
+-- Felder 31-35: Mixgetränke (Grün)
+INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
+(31, 'Tiki-Bar', 'Straße', '8 Schlucke', '7 Schlucke', 'Grün', 'Mixgetränk', '7 Schlucke', NULL, NULL),
+(32, 'Mojito-Meile', 'Straße', '9 Schlucke', '8 Schlucke', 'Grün', 'Mixgetränk', '8 Schlucke', NULL, NULL),
+(33, 'Daiquiri-Diele', 'Straße', '10 Schlucke', '9 Schlucke', 'Grün', 'Mixgetränk', '9 Schlucke', NULL, NULL),
+(34, 'Caipirinha-Club', 'Straße', '11 Schlucke', '10 Schlucke', 'Grün', 'Mixgetränk', '10 Schlucke', NULL, NULL),
+(35, 'Pina-Colada-Paradies', 'Straße', '12 Schlucke', '11 Schlucke', 'Grün', 'Mixgetränk', '11 Schlucke', NULL, NULL);
+
+-- Felder 36-39: Shots (Lila)
+INSERT INTO `spielfelder` (`feld_id`, `name`, `typ`, `kaufpreis`, `miete`, `farbe`, `alkohol_typ`, `alkohol_menge`, `zusatz_regel`, `besitzer`) VALUES
+(36, 'Vodka-Bahnhof', 'Bahnhof', '6 cl', '3 Shots', 'Lila', 'Shot', '3', NULL, NULL),
+(37, 'Sake-Bahnhof', 'Bahnhof', '5 cl', '2 Shots', 'Lila', 'Shot', '2', NULL, NULL),
+(38, 'Jägermeister-Station', 'Straße', '4 Shots', '3 Shots', 'Lila', 'Shot', '3', NULL, NULL),
+(39, 'Steuer', 'Steuer', NULL, '4 Schlucke', 'Lila', 'Shot', '4', 'An alle verteilen', NULL);
 
 --
 -- Indizes der exportierten Tabellen
