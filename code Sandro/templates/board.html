@@ -372,8 +372,8 @@
                 <div class="feld"
                   style="background: {{ css_farbe }};
                          border: 2px solid black; cursor:pointer;"
-                  data-feld-index="{{ feld_idx }}"
-                  onclick="zeigeFeldInfo({{ feld_idx }})">
+                  data-feld-id="{{ feldinfo.feld_id }}"
+                  onclick="zeigeFeldInfo({{ feldinfo.feld_id }})">
                   {{ feldinfo.name }}
                   {% for i in range(spieler|length) %}
                     {% if feld_idx == positionen[i] %}
@@ -422,18 +422,25 @@
             let feld = {{ feldinfo|tojson }};
             let aktiver = {{ popup_spieler }};
             let spielername = "{{ spieler[popup_spieler] }}";
-            let feld_idx = {{ pending_popup["feld"] if pending_popup else 0 }};
-            let feld_id = {{ feldinfo.feld_id if pending_popup else 0 }};
+            let feld_id = feld.feld_id;
             let html = `<h3>${feld.name}</h3>`;
             html += `<p>Typ: <b>${feld.typ}</b></p>`;
             if (feld.kaufpreis) html += `<p>Kaufpreis: <b>${feld.kaufpreis}</b></p>`;
             if (feld.miete) html += `<p>Miete: <b>${feld.miete}</b></p>`;
             html += `<p>Alkohol: <b>${feld.alkohol_typ}</b> (${feld.alkohol_menge})</p>`;
             if (feld.zusatz_regel) html += `<p>Regel: <b>${feld.zusatz_regel}</b></p>`;
+
+            // Hilfsfunktion für Straßenfeld
+            function isStrassenfeld(typ) {
+              return String(typ).trim().toLowerCase().replace("ß", "ss") === "strasse";
+            }
+
             if (!feld.besitzer) {
               html += `<p>Dieses Feld ist frei.</p>`;
-              html += `<button id="kaufen-btn" data-feld="${feld_id}">Feld kaufen</button>`;
-              html += `<button id="skip-btn" data-feld="${feld_id}">Nicht kaufen</button>`;
+              if (isStrassenfeld(feld.typ)) {
+                html += `<button id="kaufen-btn" data-feld="${feld_id}">Feld kaufen</button>`;
+              }
+              html += `<button id="skip-btn" data-feld="${feld_id}">${isStrassenfeld(feld.typ) ? "Nicht kaufen" : "OK"}</button>`;
             } else if (feld.besitzer !== spielername) {
               html += `<p>Besitzer: <b>${feld.besitzer}</b></p>`;
               html += `<button id="miete-btn" data-feld="${feld_id}">Miete zahlen</button>`;
@@ -571,8 +578,8 @@
   </script>
   <script>
     // Interaktive Feldinfo für jedes Feld
-    function zeigeFeldInfo(idx) {
-      const feld = window.felder_infos[idx];
+    function zeigeFeldInfo(feld_id) {
+      const feld = window.felder_infos.find(f => f.feld_id == feld_id);
       let html = `<h3>${feld.name}</h3>`;
       html += `<p>Typ: <b>${feld.typ}</b></p>`;
       if (feld.kaufpreis) html += `<p>Kaufpreis: <b>${feld.kaufpreis}</b></p>`;

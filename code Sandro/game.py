@@ -40,8 +40,12 @@ def reset_besitzer():
 def lade_felder_infos():
     """Lädt alle Spielfeld Informationen als Liste von Dicts."""
     with db_cursor(dictionary=True) as cursor:
-        cursor.execute("SELECT * FROM spielfelder ORDER BY feld_id ASC")  # Holt alle Felder sortiert
-        return cursor.fetchall()  # Gibt die Felder als Liste zurück
+        cursor.execute("SELECT * FROM spielfelder ORDER BY feld_id ASC")
+        felder = cursor.fetchall()
+        print("[DEBUG] Felder aus DB geladen:")
+        for f in felder:
+            print(f"  feld_id={f['feld_id']}, name={f['name']}, typ={f['typ']}, besitzer={f['besitzer']}")
+        return felder  # Gibt die Felder als Liste zurück
 
 def get_besitz_uebersicht():
     felder_infos = lade_felder_infos()  # Holt alle Felder
@@ -89,6 +93,7 @@ def namen():
 def spiel():
     # Hauptspiel-Route
     felder_infos = lade_felder_infos()  # Holt alle Felderinfos
+    print(f"[DEBUG] feld_infos-Liste Länge: {len(felder_infos)}")
     aktiver = session.get("aktiver", 0)  # Aktiver Spieler
     pos_liste = session.get("positionen", [])  # Positionen der Spieler
     pending_popup = session.get("pending_popup")  # Offenes Feld-Popup
@@ -166,6 +171,8 @@ def spiel():
     if pending_popup:
         popup_spieler = pending_popup["spieler"]  # Spieler, der dran ist
         popup_feldinfo = felder_infos[pending_popup["feld"]]  # Feldinfo für das aktuelle Feld
+        print(f"[DEBUG] pending_popup: {pending_popup}")
+        print(f"[DEBUG] popup_feldinfo: feld_id={popup_feldinfo['feld_id']}, name={popup_feldinfo['name']}, typ={popup_feldinfo['typ']}")
         popup_wurf = pending_popup["wurf"]  # Wurf, der zu diesem Feld geführt hat
     else:
         popup_feldinfo = None
@@ -191,23 +198,27 @@ def spiel():
 
 @app.route("/feld_aktion", methods=["POST"])
 def feld_aktion():
-    data = request.get_json()  # Holt die Aktion aus dem Request
-    aktion = data.get("aktion")  # Aktionstyp (kaufen, miete, skip)
-    feld_id = int(data.get("feld"))  # <-- Jetzt echte Feld-ID, nicht Listenindex!
-    pending_popup = session.get("pending_popup")  # Aktuelles Popup
+    data = request.get_json()
+    print(f"[DEBUG] feld_aktion POST data: {data}")
+    aktion = data.get("aktion")
+    feld_id = int(data.get("feld"))
+    print(f"[DEBUG] feld_aktion: aktion={aktion}, feld_id={feld_id}")
+    pending_popup = session.get("pending_popup")
+    print(f"[DEBUG] session['pending_popup']: {pending_popup}")
     if not pending_popup:
-        return jsonify({"ok": False, "msg": "Kein aktiver Zug!"})  # Kein aktiver Zug
+        return jsonify({"ok": False, "msg": "Kein aktiver Zug!"})
 
-    aktiver = pending_popup["spieler"]  # Aktiver Spieler
-    felder_infos = lade_felder_infos()  # Holt Felderinfos
-    # Suche das Feld mit der passenden ID
+    aktiver = pending_popup["spieler"]
+    felder_infos = lade_felder_infos()
+    print(f"[DEBUG] Suche Feld mit feld_id={feld_id} in felder_infos")
     feld = next((f for f in felder_infos if int(f["feld_id"]) == feld_id), None)
     if not feld:
+        print(f"[DEBUG] Feld mit feld_id={feld_id} NICHT gefunden!")
         return jsonify({"ok": False, "msg": f"Feld mit ID {feld_id} nicht gefunden."})
+    print(f"[DEBUG] Feld gefunden: feld_id={feld['feld_id']}, name={feld['name']}, typ={feld['typ']}, besitzer={feld['besitzer']}")
 
     # --- Fix: Typ-Vergleich für Straße robust machen ---
     def is_strassenfeld(feldtyp):
-        # Debug-Ausgabe für den Typ
         print(f"[DEBUG] feldtyp repr: {repr(feldtyp)}")
         typ_str = str(feldtyp).strip().lower().replace("ß", "ss")
         print(f"[DEBUG] feldtyp normalisiert: {typ_str}")
@@ -222,11 +233,13 @@ def feld_aktion():
             print(f"[DEBUG] Kauf abgelehnt - kein Straßenfeld (typ war: {repr(feld['typ'])})")
             return jsonify({"ok": False, "msg": f"Nur Straßen können gekauft werden. (typ: {repr(feld['typ'])})"})
         with db_cursor() as cursor:
+            print(f"[DEBUG] UPDATE spielfelder SET besitzer={spielername} WHERE feld_id={feld_id}")
             cursor.execute(
                 "UPDATE spielfelder SET besitzer=%s WHERE feld_id=%s",
                 (spielername, feld_id),
             )  # Setzt den Besitzer in der DB anhand der ID
         schlucke = parse_schlucke(feld.get("kaufpreis"))  # Holt die Schlucke für den Kauf
+        print(f"[DEBUG] parse_schlucke({feld.get('kaufpreis')}) = {schlucke}")
         session["konto"][aktiver] += schlucke  # Addiert Schlucke zum Konto
         session["pending_popup"] = None  # Popup schließen
         session["aktiver"] = (aktiver + 1) % len(session["spieler"])  # Nächster Spieler
@@ -235,8 +248,10 @@ def feld_aktion():
 
     if aktion == "miete":
         besitzer_name = feld.get("besitzer")  # Besitzer des Feldes
+        print(f"[DEBUG] Miete zahlen an: {besitzer_name}")
         if besitzer_name:
             schlucke = parse_schlucke(feld.get("miete"))  # Holt die Schlucke für die Miete
+            print(f"[DEBUG] parse_schlucke({feld.get('miete')}) = {schlucke}")
             session["konto"][aktiver] += schlucke  # Addiert Schlucke zum Konto
         session["pending_popup"] = None  # Popup schließen
         session["aktiver"] = (aktiver + 1) % len(session["spieler"])  # Nächster Spieler
@@ -244,11 +259,13 @@ def feld_aktion():
         return jsonify({"ok": True})
 
     if aktion == "skip":
+        print("[DEBUG] Aktion skip")
         session["pending_popup"] = None  # Popup schließen
         session["aktiver"] = (aktiver + 1) % len(session["spieler"])  # Nächster Spieler
         session["warte_auf_wurf"] = True  # Wieder auf Wurf warten
         return jsonify({"ok": True})
 
+    print("[DEBUG] Unbekannte Aktion")
     return jsonify({"ok": False})  # Unbekannte Aktion
 
 if __name__ == "__main__":

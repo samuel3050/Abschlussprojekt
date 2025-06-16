@@ -9,13 +9,15 @@ function wuerfeln() {
 // Feld kaufen Popup: "Kaufpreis bezahlt" mit Button
 window.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => {
+        // Beispiel für das Kaufen-Button-Handling:
         const kaufenBtn = document.getElementById('kaufen-btn');
         if (kaufenBtn) {
             kaufenBtn.onclick = function() {
+                const feldId = kaufenBtn.getAttribute('data-feld');
                 fetch('/feld_aktion', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({aktion: 'kaufen', feld: kaufenBtn.getAttribute('data-feld')})
+                    body: JSON.stringify({aktion: 'kaufen', feld: feldId})
                 }).then(res => res.json()).then(() => {
                     document.getElementById('feld-modal').innerHTML = `
                         <h3>Kaufpreis bezahlt!</h3>
