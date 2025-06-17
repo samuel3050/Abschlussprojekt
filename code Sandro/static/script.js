@@ -1,52 +1,23 @@
 function wuerfeln() {
     const btn = document.getElementById('wuerfelnBtn');
     if (btn) btn.disabled = true;
-
-    let count = 0;
-    const max = 13;
-    const w1 = document.getElementById('w1');
-    const w2 = document.getElementById('w2');
-    const popup = document.getElementById('wurf-popup');
-    const popupText = document.getElementById('wurf-popup-text');
-    const popupOk = document.getElementById('wurf-popup-ok');
-
-    let wurf1 = 1, wurf2 = 1;
-    popup.style.display = 'none';
-    popupOk.style.display = 'none';
-
-    const anim = setInterval(() => {
-        wurf1 = Math.floor(Math.random()*6)+1;
-        wurf2 = Math.floor(Math.random()*6)+1;
-        w1.src = `/static/dice/${wurf1}.png`;
-        w2.src = `/static/dice/${wurf2}.png`;
-        count++;
-        if (count >= max) {
-            clearInterval(anim);
-            // Zeige NUR das kleine Popup mit Text und OK (KEINE Würfelbilder im Popup!)
-            popup.style.display = 'block';
-            popupText.textContent = `${window.aktiverSpieler} hat ${wurf1 + wurf2} gewürfelt!`;
-            popupOk.style.display = '';
-            popupOk.onclick = function() {
-                popup.style.display = 'none';
-                // Sende POST an /board um den Zug abzuschließen
-                const form = document.getElementById('wuerfelform');
-                if (form) form.submit();
-            };
-        }
-    }, 80);
+    const form = document.getElementById('wuerfelform');
+    if (form) form.submit();
     return false;
 }
 
 // Feld kaufen Popup: "Kaufpreis bezahlt" mit Button
 window.addEventListener("DOMContentLoaded", function() {
     setTimeout(() => {
+        // Beispiel für das Kaufen-Button-Handling:
         const kaufenBtn = document.getElementById('kaufen-btn');
         if (kaufenBtn) {
             kaufenBtn.onclick = function() {
+                const feldId = kaufenBtn.getAttribute('data-feld');
                 fetch('/feld_aktion', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({aktion: 'kaufen', feld: kaufenBtn.getAttribute('data-feld')})
+                    body: JSON.stringify({aktion: 'kaufen', feld: feldId})
                 }).then(res => res.json()).then(() => {
                     document.getElementById('feld-modal').innerHTML = `
                         <h3>Kaufpreis bezahlt!</h3>
